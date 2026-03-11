@@ -20,81 +20,66 @@ To write a PYTHON program for socket for HTTP for web page upload and download
 ## SERVER.PY
 ```
 import socket
-HOST = '127.0.0.1'  
-PORT = 8080    
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen(5)
-print("Server running on http://127.0.0.1:8080")
+
+s = socket.socket()
+s.bind(("localhost",8080))
+s.listen(1)
+
+print("Server running...")
+
 while True:
-    client_socket, addr = server_socket.accept()
-    print("Connected by", addr)
-    request = client_socket.recv(1024).decode()
-    print("Request:\n", request)
+    c,addr = s.accept()
+    
+    request = c.recv(1024).decode()
+    print("Request received")
+
     if "GET" in request:
-        with open("index.html", "r") as file:
-            content = file.read()
-        response = "HTTP/1.1 200 OK\n"
-        response += "Content-Type: text/html\n\n"
-        response += content
-        client_socket.send(response.encode())
+        f = open("index.html","r")
+        data = f.read()
+        f.close()
+
+        response = "HTTP/1.1 200 OK\n\n" + data
+        c.send(response.encode())
+
     elif "POST" in request:
-        data = request.split("\r\n\r\n")[1]
-        with open("uploaded.html", "w") as file:
-            file.write(data)
-        response = "HTTP/1.1 200 OK\n\nFile Uploaded Successfully"
-        client_socket.send(response.encode())
-    client_socket.close()import socket
-HOST = '127.0.0.1'  
-PORT = 8080    
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen(5)
-print("Server running on http://127.0.0.1:8080")
-while True:
-    client_socket, addr = server_socket.accept()
-    print("Connected by", addr)
-    request = client_socket.recv(1024).decode()
-    print("Request:\n", request)
-    if "GET" in request:
-        with open("index.html", "r") as file:
-            content = file.read()
-        response = "HTTP/1.1 200 OK\n"
-        response += "Content-Type: text/html\n\n"
-        response += content
-        client_socket.send(response.encode())
-    elif "POST" in request:
-        data = request.split("\r\n\r\n")[1]
-        with open("uploaded.html", "w") as file:
-            file.write(data)
-        response = "HTTP/1.1 200 OK\n\nFile Uploaded Successfully"
-        client_socket.send(response.encode())
-    client_socket.close()
+        data = request.split("\n\n")[1]
+
+        f = open("upload.txt","w")
+        f.write(data)
+        f.close()
+
+        c.send("HTTP/1.1 200 OK\n\nFile Uploaded".encode())
+
+    c.close()
 ```
 ## CLIENT.PY
 ```
 import socket
-HOST = '127.0.0.1'
-PORT = 8080
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((HOST, PORT))
-choice = input("Enter 1 to Download page, 2 to Upload page: ")
-if choice == "1":
-    request = "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
-    client_socket.send(request.encode())
-    response = client_socket.recv(4096).decode()
-    print("Server Response:\n")
-    print(response)
-elif choice == "2":
-    data = "<html><body><h2>Uploaded Page</h2></body></html>"
-    request = "POST / HTTP/1.1\r\n"
-    request += "Host: localhost\r\n"
-    request += "Content-Length: " + str(len(data)) + "\r\n\r\n"
-    request += data
-    client_socket.send(request.encode())
-    response = client_socket.recv(4096).decode()
-    print("Server Response:\n", response)
-client_socket.close()
+
+s = socket.socket()
+s.connect(("localhost",8080))
+
+ch = input("1.Download 2.Upload : ")
+
+# Download webpage
+if ch == "1":
+    req = "GET / HTTP/1.1\nHost: localhost\n\n"
+    s.send(req.encode())
+
+    data = s.recv(4096)
+    print(data.decode())
+
+# Upload file
+else:
+    msg = input("Enter data to upload: ")
+
+    req = "POST / HTTP/1.1\nHost: localhost\n\n" + msg
+    s.send(req.encode())
+
+    data = s.recv(1024)
+    print(data.decode())
+
+s.close()
 ```
 ## INDEX.HTML
 ```
@@ -111,13 +96,14 @@ client_socket.close()
 
 ## CLIENT:
 
-<img width="834" height="415" alt="image" src="https://github.com/user-attachments/assets/ab7a93ba-ff54-42b7-ac44-a90cc158cc44" />
+<img width="659" height="605" alt="image" src="https://github.com/user-attachments/assets/79374185-ff60-4799-b90c-5c1ca274605f" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4e89db3a-9397-42b4-a07f-0724928c9a72" />
+
 
 ## SERVER:
 
-
-<img width="829" height="336" alt="image" src="https://github.com/user-attachments/assets/51194576-6632-462b-b74e-7caa9441b570" />
-
+<img width="801" height="558" alt="image" src="https://github.com/user-attachments/assets/1d017cf5-cf1f-4750-8adb-42535585f4f6" />
 
 ## Result
 Thus the socket for HTTP for web page upload and download created and Executed
